@@ -18,7 +18,21 @@ public class AMSPlotter {
     private final List<XYSeries> expectations = new ArrayList<>();
     private final List<XYSeries> normalizedVariances = new ArrayList<>();
     private final List<XYSeries> usedMem = new ArrayList<>();
-    private final int[] copies = {10, 25, 50};
+    private final int[] copies;
+
+    public AMSPlotter(int[] copies) {
+        this.copies = copies;
+        try {
+            XYSeries F2series = new XYSeries("Real F2");
+            long realF2 = HarryPotter.calculateF2();
+            for (int i: copies) {
+                F2series.add(i, realF2);
+            }
+            expectations.add(F2series);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @SafeVarargs
     public final void addResultSeries(String name, ExperimentResult<?>... results) throws IOException, URISyntaxException {
@@ -28,9 +42,9 @@ public class AMSPlotter {
         int copyInd = 0;
         for (ExperimentResult<?> result : results) {
             long expectation = CalculationUtil.calculateExpectation(result.getResults().stream());
-            long normalizedVariance = CalculationUtil.calculateNormalizedVariance(result.getResults().stream(), expectation);
+            double normalizedVariance = CalculationUtil.calculateNormalizedVariance(result.getResults());
             expectationSeries.add(copies[copyInd], expectation);
-            normalizedVarianceSeries.add(copies[copyInd], normalizedVariance);
+            normalizedVarianceSeries.add(copies[copyInd], Math.abs(normalizedVariance));
             usedMemSeries.add(copies[copyInd], result.getMem());
             copyInd++;
         }
@@ -41,7 +55,7 @@ public class AMSPlotter {
 
     public void plot() throws IOException {
         plot("Expectation", getDataset(expectations));
-        plot("Normalized-Variance", getDataset(normalizedVariances));
+        plot("Normalized-Variance (Absolute)", getDataset(normalizedVariances));
         plot("Used Memory", getDataset(usedMem));
     }
 
@@ -53,7 +67,6 @@ public class AMSPlotter {
                 dataset,
                 PlotOrientation.VERTICAL,
                 true, true, false);
-
         int width = 640;   /* Width of the image */
         int height = 480;  /* Height of the image */
         File XYChart = new File( chartTile + ".jpeg" );

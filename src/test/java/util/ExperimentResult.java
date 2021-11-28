@@ -22,12 +22,12 @@ public class ExperimentResult<T extends AMS> {
     }
 
     public static <T extends AMS> ExperimentResult<T> getExperimentResults(Constructor<T> amsConstructor, Object... k) throws Exception{
-        long memBefore = getUsedMem();
         List<Long> results = getExperimentParallelStream(amsConstructor, k)
                 .map(ExperimentResult::process)
                 .collect(toList());
-        System.out.println("******* Finished processing " + amsConstructor.getName() + ", params=" + Arrays.stream(k).toList());
-        return new ExperimentResult<>(results, getUsedMem() - memBefore);
+        System.out.println("******* Finished processing "
+                + amsConstructor.getName() + ", params=" + Arrays.stream(k).toList());
+        return new ExperimentResult<>(results, getNumOfBaseEstimators(k));
     }
 
     public List<Long> getResults() {
@@ -43,7 +43,7 @@ public class ExperimentResult<T extends AMS> {
         for (int i=0; i < RUN_EXPERIMENT_TIMES; i++) {
             experiments.add(constructor.newInstance(k));
         }
-        return experiments.stream().parallel();
+        return experiments.parallelStream();
     }
 
     private static long process(AMS ams) {
@@ -54,8 +54,12 @@ public class ExperimentResult<T extends AMS> {
         }
     }
 
-    private static long getUsedMem() {
-        return Runtime.getRuntime().totalMemory()-Runtime.getRuntime().freeMemory();
+    private static int getNumOfBaseEstimators(Object... k) {
+        int mul = 1;
+        for(int i=0; i<k.length; i++) {
+            mul *= (int)k[i];
+        }
+        return mul;
     }
 
 }

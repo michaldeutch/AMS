@@ -16,7 +16,7 @@ public class AMSMedian implements AMS {
     @Override
     public long process() throws Exception {
         int size = ams.size();
-        return Math.round(ams.stream().parallel().mapToLong(ams -> {
+        return Math.round(ams.parallelStream().mapToLong(ams -> {
             try {
                 return ams.process();
             } catch (Exception e) {
