@@ -96,6 +96,10 @@ Absolute value was applied to each of the normalized variance values
 
 ![alt text](Normalized-Variance%20(Absolute).jpeg)
 
+It's obvious that the Beta estimator is much less accurate then the final estimators. Both of the final estimators look pretty close together in this scale.
+
 #### Memory Usage
+Calculated is the number of total basic estimators used.
 
 ![alt text](Used%20Memory.jpeg)
+
